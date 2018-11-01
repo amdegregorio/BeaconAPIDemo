@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+<head lang="en">
+   <title>User Profile Entry</title>
+   <link th:href="@{/style/main.css}" type="text/css" rel="stylesheet" media="screen,projection"/>
+   <script type="text/javascript">
+      function sendSimpleBeacon(data) {
+    	  if (!navigator.sendBeacon) return;
+    	  
+    	  var url = "http://localhost:8080/beacon/";
+    	  var data = "data=" + data;
+    	  
+    	  var status = navigator.sendBeacon(url + "?" + data);
+    	  console.log("Status of sendBeacon: " + status);
+      }
+      
+      function sendInfoBeacon(action) {
+         if (!navigator.sendBeacon) return;
+    	  
+    	  var url = "http://localhost:8080/beacon/info/";
+    	  var data = JSON.stringify({
+    		    browser: navigator.appName + " " + navigator.browserCodeName + " " + navigator.appVersion,
+    		    os: navigator.platform,
+    		    lang: navigator.language,
+    		    time: Date(),
+    		    action: action
+          });
+    	  
+    	  var status = navigator.sendBeacon(url, data);
+    	  console.log("Status of sendBeacon: " + status);
+      }
+   </script>
+</head>
+<body onload="sendSimpleBeacon('loading the form')">
+<h2>User Profile</h2>
+  <form action="save" id="saveProfileForm" th:object="${userProfileDto}" method="post" onsubmit="sendInfoBeacon('submit')">
+    <div>
+      <input th:field="*{id}" id="id" type="hidden"/>
+      <label for="username">Username:</label>
+      <input type="text" th:field="*{username}" id="username"/>
+    </div>
+    <div>
+      <label for="firstName">First Name:</label>
+      <input type="text" th:field="*{firstName}" id="firstName"/>
+    </div>
+    <div>
+      <label for="lastName">Last Name:</label>
+      <input type="text" th:field="*{lastName}" id="lastName"/>
+    </div>
+    <div>
+      <label for="title">Title:</label>
+         <select id="title" th:field="*{title}">
+            <option value="" selected="selected">-- Please select one --</option>
+		    <option th:each="titleOpt : ${titles}"
+	                  th:value="${titleOpt}"
+	                  th:text="${titleOpt}"></option>
+	      </select>
+    </div>
+    <div>
+      <label for="emailAddress">Email:</label>
+      <input type="email" th:field="*{emailAddress}" id="emailAddress"/>
+    </div>
+    <div>
+      <label for="phoneNumber">Phone:</label>
+      <input type="tel" th:field="*{phoneNumber}" id="phoneNumber"/>
+    </div>
+    <div>
+      <label for="aboutMe">About Me:</label>
+      <textarea rows="4" cols="80" th:field="*{aboutMe}" id="aboutMe" onblur="sendInfoBeacon('leaving about me box')"></textarea>
+    </div>
+    <div>
+      <button type="submit">Save</button>
+    </div>
+  </form>
+</body>
+</html>
